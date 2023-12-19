@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Login</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script src="https://cdn.jsdelivr.net/npm/web3@1.3.6/dist/web3.min.js"></script>
+	<link rel="icon" type="image/png" href="images/icons/favicon2.svg"/>
+	<link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" type="text/css" href="vendor/animate/animate.css">
+	<link rel="stylesheet" type="text/css" href="vendor/css-hamburgers/hamburgers.min.css">
+	<link rel="stylesheet" type="text/css" href="vendor/select2/select2.min.css">
+	<link rel="stylesheet" type="text/css" href="css/util.css">
+	<link rel="stylesheet" type="text/css" href="css/main.css">
+</head>
+<body>
+	<div class="limiter">
+		<div class="container-login100">
+
+			<button class="btn btn-warning" onclick="connectMetamask()">Connect to Metamask</button> <br>
+				<p id="accountArea"></p>
+			<button class="btn btn-info" onclick="connectContract()">Connect to Contract</button> <br>
+			<p id="contractArea"></p>
+
+			<div class="wrap-login100">
+				<div class="login100-pic js-tilt" data-tilt>
+					<img src="images/img-05.jpg" alt="IMG">
+				</div>
+
+				<form class="login100-form" id="loginForm">
+					<span class="login100-form-title">
+						Ingreso al sistema
+					</span>
+
+					<div class="wrap-input100 validate-input" data-validate="Password is required">
+						<input class="input100" type="password" name="pass" placeholder="Contraseña">
+						<span class="focus-input100"></span>
+						<span class="symbol-input100">
+							<i class="fa fa-lock" aria-hidden="true"></i>
+						</span>
+					</div>
+					
+					<div class="container-login100-form-btn">
+						<button class="login100-form-btn">Login
+						</button>
+					</div>
+
+					<div class="text-center p-t-12">
+						<span class="txt1">
+							¿Olvidaste tu
+						</span>
+						<a class="txt2" href="#">
+							Usuario/Contraseña?
+						</a>
+					</div>
+
+					<div class="text-center p-t-136">
+						<a class="txt2" href="#">
+							Crea tu cuenta
+							<i class="fa fa-long-arrow-right m-l-5" aria-hidden="true"></i>
+						</a>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+
+	<button onclick="validarUsuario()">VALIDAR USUARIO</button> <br>
+	<p id="dataArea"></p>
+
+	
+	<script src="vendor/jquery/jquery-3.2.1.min.js"></script>
+	<script src="vendor/bootstrap/js/popper.js"></script>
+	<script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+	<script src="vendor/select2/select2.min.js"></script>
+	<script src="vendor/tilt/tilt.jquery.min.js"></script>
+	<script>
+		$('.js-tilt').tilt({
+			scale: 1.1
+		})
+	</script>
+	<script src="js/main.js"></script>
+	<script>
+		//1- connect metamask
+		let account;
+		const connectMetamask = async () => {
+			if (window.ethereum !== undefined) {
+				const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+				account = accounts[0];
+				document.getElementById("accountArea").innerHTML = " ✅";
+			}
+		}
+  
+		//2- connect to smart contract
+		const connectContract = async () => {
+			const ABI = [
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "bytes32",
+				"name": "id",
+				"type": "bytes32"
+			},
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "numeroSocio",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "fechaHora",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "valorConsulta",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "validacionPaciente",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "validacionOS",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "observaciones",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "estado",
+				"type": "uint256"
+			}
+		],
+		"name": "ConsultaRegistrada",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_numeroSocio",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_fechaHora",
+				"type": "uint256"
+			}
+		],
+		"name": "osValidarConsulta",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "_id",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_numeroSocio",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_fechaHora",
+				"type": "uint256"
+			}
+		],
+		"name": "pacienteValidarConsulta",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "_id",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_numeroSocio",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_fechaHora",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_valorConsulta",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "_validacionPaciente",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "_validacionOS",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "_observaciones",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_estado",
+				"type": "uint256"
+			}
+		],
+		"name": "registrarConsulta",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_usuario",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "_clave",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_rol",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_numeroSocio",
+				"type": "uint256"
+			}
+		],
+		"name": "registrarUsuario",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"name": "consultas",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "numeroSocio",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "fechaHora",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "valorConsulta",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "validacionPaciente",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "validacionOS",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "observaciones",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "estado",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "_id",
+				"type": "bytes32"
+			}
+		],
+		"name": "obtenerConsulta",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "uint256",
+						"name": "numeroSocio",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "fechaHora",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "valorConsulta",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "validacionPaciente",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "validacionOS",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "observaciones",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "estado",
+						"type": "uint256"
+					}
+				],
+				"internalType": "struct Consultorio.Consulta",
+				"name": "",
+				"type": "tuple"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_numeroSocio",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_fechaHora",
+				"type": "uint256"
+			}
+		],
+		"name": "obtenerConsultaPorDatos",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "_id",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"name": "usuarios",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "usuario",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "clave",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "rol",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "numeroSocio",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_usuario",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "_clave",
+				"type": "string"
+			}
+		],
+		"name": "validarUsuario",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "rol",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+];
+			const Address = "0x2bEeC5f4a66a9D979691b42a0ae954244e2aBC82";
+			window.web3 = await new Web3(window.ethereum);
+			window.contract = await new window.web3.eth.Contract(ABI, Address); 
+			document.getElementById("contractArea").innerHTML = " ✅";
+		}
+  
+	
+		document.getElementById("loginForm").addEventListener("submit", async function (event) {
+        // Prevent the default form submission behavior
+        event.preventDefault();
+
+        const address = account;
+        const password = document.getElementsByName("pass")[0].value;
+
+        try {
+            console.log("Calling validarUsuario function...");
+            const role = await window.contract.methods.validarUsuario(
+                window.web3.utils.toChecksumAddress(address),
+                password
+            ).call();
+
+            console.log("Role:", role);
+
+            if (role) {
+                alert("Login successful. Redirecting...");
+                window.location.href = "./principal.html";
+            } else {
+                alert("Invalid address or password. Please try again.");
+            }
+        } catch (error) {
+            console.error("Error validating user:", error);
+            alert("An error occurred. Please try again later.\n" + error.message);
+        }
+    });
+
+	</script>
+</body>
+</html>

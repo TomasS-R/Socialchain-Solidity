@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700,900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="images/icons/favicon2.svg"/>
+    <link rel="stylesheet" href="fonts/icomoon/style.css">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.2.7-rc.0/web3.min.js"></script>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    
+    <!-- Style -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <title>Alta de Consulta</title>
+  </head>
+  <body>
+	
+  <div class="content">
+    <div class="container">
+		<div class="connection_buttons">
+			<button class="btn btn-warning" onclick="connectMetamask()">Connect to Metamask</button> <br>
+			<p id="accountArea"></p>
+			<button class="btn btn-info" onclick="connectContract()">Connect to Contract</button> <br>
+			<p id="contractArea"></p>
+		  </div>
+      <div class="row align-items-stretch justify-content-center no-gutters">
+        <div class="col-md-7">
+          <div class="form h-100 contact-wrap p-5">
+            <a class="volver" text="Volver" href="./principal.html">&laquo; Volver</a>
+            <h3 class="text-center">Alta de consulta</h3>
+            <form class="mb-5" method="post" id="contactForm" name="contactForm">
+              <div class="row">
+                <div class="col-md-6 form-group mb-3">
+                  <label for="" class="col-form-label">N° de Socio *</label>
+                  <input type="number" class="form-control" name="number" id="number" placeholder="1">
+                </div>
+                <div class="col-md-6 form-group mb-3">
+                  <label for="" class="col-form-label">Día/Hora *</label>
+                  <input type="datetime" class="form-control" name="fecha" id="fecha"  placeholder="1122023">
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-12 form-group mb-3">
+                  <label for="budget" class="col-form-label">Valor *</label>
+                  <input type="number" class="form-control" name="valor" id="valor" placeholder="10000">
+                </div>
+              </div>
+
+              <div class="row mb-5">
+                <div class="col-md-12 form-group mb-3">
+                  <label for="message" class="col-form-label">Observaciones</label>
+                  <textarea class="form-control" name="message" id="message" cols="30" rows="4"  placeholder="Escriba su mensaje aquí"></textarea>
+                </div>
+              </div>
+            </form>
+			<div class="row justify-content-center">
+                <div class="col-md-4 form-group text-center">
+					<button class="btn btn-info" onclick="registerConsulta()">Registrar</button><br>
+					<p id="dataArea"></p>
+                </div>
+              </div>
+            <div id="form-message-warning mt-4"></div> 
+            <div id="form-message-success">
+              Se ha dado de alta la consulta con éxito
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+    
+    <script src="js/jquery-3.3.1.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/jquery.validate.min.js"></script>
+    <script src="js/main.js"></script>
+
+    <script>
+      //1- connect metamask
+      let account;
+      const connectMetamask = async () => {
+          if(window.ethereum !== "undefined") {
+              const accounts = await ethereum.request({method: "eth_requestAccounts"});
+              account = accounts[0];
+              document.getElementById("accountArea").innerHTML = " ✅";
+          }
+      }
+
+      //2- connect to smart contract
+      const connectContract = async () => {
+          const ABI = [
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "bytes32",
+				"name": "id",
+				"type": "bytes32"
+			},
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "numeroSocio",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "fechaHora",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "valorConsulta",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "validacionPaciente",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "validacionOS",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "observaciones",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "estado",
+				"type": "uint256"
+			}
+		],
+		"name": "ConsultaRegistrada",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_numeroSocio",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_fechaHora",
+				"type": "uint256"
+			}
+		],
+		"name": "osValidarConsulta",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "_id",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_numeroSocio",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_fechaHora",
+				"type": "uint256"
+			}
+		],
+		"name": "pacienteValidarConsulta",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "_id",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_numeroSocio",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_fechaHora",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_valorConsulta",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "_validacionPaciente",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "_validacionOS",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "_observaciones",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_estado",
+				"type": "uint256"
+			}
+		],
+		"name": "registrarConsulta",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_usuario",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "_clave",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_rol",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_numeroSocio",
+				"type": "uint256"
+			}
+		],
+		"name": "registrarUsuario",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"name": "consultas",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "numeroSocio",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "fechaHora",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "valorConsulta",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "validacionPaciente",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "validacionOS",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "observaciones",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "estado",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "_id",
+				"type": "bytes32"
+			}
+		],
+		"name": "obtenerConsulta",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "uint256",
+						"name": "numeroSocio",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "fechaHora",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "valorConsulta",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "validacionPaciente",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "validacionOS",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "observaciones",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "estado",
+						"type": "uint256"
+					}
+				],
+				"internalType": "struct Consultorio.Consulta",
+				"name": "",
+				"type": "tuple"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_numeroSocio",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_fechaHora",
+				"type": "uint256"
+			}
+		],
+		"name": "obtenerConsultaPorDatos",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "_id",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"name": "usuarios",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "usuario",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "clave",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "rol",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "numeroSocio",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_usuario",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "_clave",
+				"type": "string"
+			}
+		],
+		"name": "validarUsuario",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "rol",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]
+          const Address = "0x2bEeC5f4a66a9D979691b42a0ae954244e2aBC82";
+          window.web3 = await new Web3(window.ethereum);
+          window.contract = await new window.web3.eth.Contract( ABI, Address); 
+          document.getElementById("contractArea").innerHTML = " ✅";
+      }
+
+      //3-read data from smart contract
+      const readContract = async () => {
+          const data = await window.contract.methods.obtenerConsulta("0x220b5cd8b5154a8302e3fa3815c8621dd1a2c1023fef097e9d4d7037af3a110a").call();
+          document.getElementById("dataArea").innerHTML = data;
+      }
+
+// Define registerConsulta function outside the event listener
+const registerConsulta = async () => {
+    // Get values from the form
+    const numeroSocio = document.getElementById("number").value;
+    const fechaHora = document.getElementById("fecha").value;
+    const valorConsulta = document.getElementById("valor").value;
+	const validacionPaciente = "0x0000000000000000000000000000000000000000";
+	const validacionOS = "0x0000000000000000000000000000000000000000";
+	const observaciones = document.getElementById("message").value;
+	const estado = "0";
+    // Call the smart contract method
+    await window.contract.methods.registrarConsulta(numeroSocio, fechaHora, valorConsulta, validacionPaciente, validacionOS, observaciones, estado).send({ from: account });
+
+    // Display success message
+    document.getElementById("form-message-success").style.display = "block";
+};
+
+// Add event listener to the form
+document.getElementById("consultaForm").addEventListener("submit", async function (event) {
+    event.preventDefault();
+    
+    // Call registerConsulta when the form is submitted
+    registerConsulta();
+});
+    
+        
+  </script>
+  </body>
+</html>
